@@ -3710,7 +3710,7 @@ class Oszicar:
         ionic_mag_pattern = re.compile(r"(\d+)\s+F=\s*([\d\-\.E\+]+)\s+"
                                        r"E0=\s*([\d\-\.E\+]+)\s+"
                                        r"d\s*E\s*=\s*([\d\-\.E\+]+)\s+"
-                                       r"mag=\s*([\d\-\.E\+]+)\s*([\d\-\.E\+]+)")
+                                       r"mag=\s*([\d\-\.E\+]+\s*[\d\-\.E\+]+\s*[\d\-\.E\+])")
         ionic_MD_pattern = re.compile(r"(\d+)\s+T=\s*([\d\-\.E\+]+)\s+"
                                       r"E=\s*([\d\-\.E\+]+)\s+"
                                       r"F=\s*([\d\-\.E\+]+)\s+"
