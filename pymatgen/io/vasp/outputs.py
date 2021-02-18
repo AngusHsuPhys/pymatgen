@@ -3710,7 +3710,7 @@ class Oszicar:
         ionic_mag_pattern = re.compile(r"(\d+)\s+F=\s*([\d\-\.E\+]+)\s+"
                                        r"E0=\s*([\d\-\.E\+]+)\s+"
                                        r"d\s*E\s*=\s*([\d\-\.E\+]+)\s+"
-                                       r"mag=\s*([\d\-\.E\+]+\s*[\d\-\.E\+]+\s*[\d\-\.E\+])")
+                                       r"mag=\s*([\d\-\.E\+]+\s*[\d\-\.E\+]+\s*[\d\-\.E\+]+)")
         ionic_MD_pattern = re.compile(r"(\d+)\s+T=\s*([\d\-\.E\+]+)\s+"
                                       r"E=\s*([\d\-\.E\+]+)\s+"
                                       r"F=\s*([\d\-\.E\+]+)\s+"
@@ -3753,7 +3753,9 @@ class Oszicar:
                     ionic_steps.append({"F": float(m.group(2)),
                                         "E0": float(m.group(3)),
                                         "dE": float(m.group(4)),
-                                        "mag": float(m.group(5))})
+                                        "mag_x": float(m.group(5)[0].split(" ")[0]),
+                                        "mag_y": float(m.group(5)[1].split(" ")[0]),
+                                        "mag_z": float(m.group(5)[2].split(" ")[0])})
                 elif ionic_MD_pattern.match(line.strip()):
                     m = ionic_MD_pattern.match(line.strip())
                     ionic_steps.append({"T": float(m.group(2)),
