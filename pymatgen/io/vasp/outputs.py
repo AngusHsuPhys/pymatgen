@@ -3750,13 +3750,10 @@ class Oszicar:
                                         "dE": float(m.group(4))})
                 elif ionic_mag_pattern.match(line.strip()):
                     m = ionic_mag_pattern.match(line.strip())
-                    print(m.group(5))
                     ionic_steps.append({"F": float(m.group(2)),
                                         "E0": float(m.group(3)),
                                         "dE": float(m.group(4)),
-                                        "mag_x": float(m.group(5).split()[0]),
-                                        "mag_y": float(m.group(5).split()[1]),
-                                        "mag_z": float(m.group(5).split()[2])})
+                                        "mag": [float(i) for i in m.group(5).split()]})
                 elif ionic_MD_pattern.match(line.strip()):
                     m = ionic_MD_pattern.match(line.strip())
                     ionic_steps.append({"T": float(m.group(2)),
