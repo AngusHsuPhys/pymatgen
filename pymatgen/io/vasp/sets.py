@@ -1275,18 +1275,11 @@ class MPHSEBSSet(MPHSERelaxSet):
             grid[0]
         )
         for k in ir_kpts:
-
+            if self.two_d_kpoints and round(k[0][2], 1) != 0:
+                continue
             kpts.append(k[0])
             weights.append(int(k[1]))
             all_labels.append(None)
-
-        if self.two_d_kpoints:
-            for kpt, weight in zip(kpts, weights):
-                if round(kpt[2], 1) != 0:
-                    print(kpt)
-                    kpts.remove(kpt)
-                    weights.remove(weight)
-                    all_labels.remove(None)
 
         # for both modes, include any user-added kpoints w/zero weight
         for k in self.added_kpoints:
