@@ -1283,6 +1283,7 @@ class MPHSEBSSet(MPHSERelaxSet):
         if self.two_d_kpoints:
             for kpt, weight in zip(kpts, weights):
                 if round(kpt[2], 1) != 0:
+                    print(kpt)
                     kpts.remove(kpt)
                     weights.remove(weight)
                     all_labels.remove(None)
