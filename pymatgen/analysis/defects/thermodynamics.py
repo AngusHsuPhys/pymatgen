@@ -172,7 +172,7 @@ class DefectPhaseDiagram(MSONable):
         all_eform = [one_def.formation_energy(fermi_level=self.band_gap / 2.) for one_def in self.entries]
         min_y_lim = min(all_eform) - 30
         max_y_lim = max(all_eform) + 30
-        limits = [[-1, self.band_gap + 1], [min_y_lim, max_y_lim]]
+        limits = [[-1, self.band_gap + 2], [min_y_lim, max_y_lim]]
 
         stable_entries = {}
         finished_charges = {}
@@ -181,21 +181,16 @@ class DefectPhaseDiagram(MSONable):
         # Grouping by defect types
         for defects, index_list in similar_defects(self.entries):
             defects = list(defects)
-
             # prepping coefficient matrix for half-space intersection
             # [-Q, 1, -1*(E_form+Q*VBM)] -> -Q*E_fermi+E+-1*(E_form+Q*VBM) <= 0  where E_fermi and E are the variables
             # in the hyperplanes
             hyperplanes = np.array(
                 [[-1.0 * entry.charge, 1, -1.0 * (entry.energy + entry.charge * self.vbm)] for entry in defects])
-
             border_hyperplanes = [[-1, 0, limits[0][0]], [1, 0, -1 * limits[0][1]], [0, -1, limits[1][0]],
                                   [0, 1, -1 * limits[1][1]]]
             hs_hyperplanes = np.vstack([hyperplanes, border_hyperplanes])
-
             interior_point = [self.band_gap / 2, min(all_eform) - 1.]
-
             hs_ints = HalfspaceIntersection(hs_hyperplanes, np.array(interior_point))
-
             # Group the intersections and coresponding facets
             ints_and_facets = zip(hs_ints.intersections, hs_ints.dual_facets)
             # Only inlcude the facets corresponding to entries, not the boundaries
@@ -204,7 +199,6 @@ class DefectPhaseDiagram(MSONable):
                                      ints_and_facets)
             # sort based on transition level
             ints_and_facets = list(sorted(ints_and_facets, key=lambda int_and_facet: int_and_facet[0][0]))
-
             # log a defect name for tracking (using full index list to avoid naming
             # in-equivalent defects with same name)
             str_index_list = [str(ind) for ind in sorted(index_list)]

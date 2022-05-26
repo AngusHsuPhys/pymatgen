@@ -1997,7 +1997,7 @@ class BSPlotterProjected(BSPlotter):
             if i == 0:
                 uniq_d.append(t[0])
                 uniq_l.append(t[1])
-                logger.debug("Adding label {l} at {d}".format(l=t[i][0], d=t[1]))
+                logger.debug("Adding label {l} at {d}".format(l=t[0], d=t[1]))
             else:
                 if t[1] == temp_ticks[i - 1][1]:
                     logger.debug("Skipping label {i}".format(i=t[1]))
