@@ -1,4 +1,5 @@
 import yaml
+from pymatgen.io.vasp.inputs import Structure
 
 
 class BaseFileWriter:
@@ -55,7 +56,7 @@ class Species(BaseFileWriter):
 
         # order the vpss_and_options by the alphabetical order of the element
         vpss_and_options = dict(sorted(vpss_and_options.items(), key=lambda item: item[0].split('_')[0]))
-        
+
         output = ""
         for vps, option in vpss_and_options.items():
             # if option is not in the list of ["Quick", "Standard", "Precise"], raise ValueError
@@ -76,7 +77,23 @@ class Species(BaseFileWriter):
         species_number = len(vpss_and_options)
         # call __init__ to get the template
         return Species(species_number=species_number, species_definition=output)
+    
+    @classmethod
+    def get_valence_electrons(cls, vpss):
+        with open('potential_table.yaml', 'r') as file:
+            data = yaml.safe_load(file)
 
+        valence_electrons = {}
+        for vps in vpss:
+            # Find the dictionary with the matching VPS
+            for d in data:
+                if d['VPS'] == vps:
+                    valence_electrons[vps] = d['Valence electrons']
+                    break
+            else:
+                # If we get here, we didn't find a match
+                raise ValueError(f"VPS {vps} not found in potential_table.yaml")
+        return valence_electrons
 
 
 
@@ -110,6 +127,56 @@ class Atoms(BaseFileWriter):
         Atoms.UnitVectors>
         """
         super().__init__(template)
+
+    @classmethod    
+    def get_atoms_from_pmg_structure(cls, structure, vpss, fractional_coordinates=True, up_dn_diff=None):
+        # get the number of atoms
+        atoms_number = len(structure)
+        if fractional_coordinates:
+            atoms_species_and_coordinates_unit = "FRAC"
+        else:
+            atoms_species_and_coordinates_unit = "Ang"
+
+        # get the species and coordinates
+        atoms_species_and_coordinates = ""
+        for i, site in enumerate(structure):
+            element = site.species_string
+            coordinates = site.frac_coords if fractional_coordinates else site.coords
+            coordinates_string = " ".join([str(c) for c in coordinates])
+
+            
+            ## call get_valence_electrons to get the number of valence electrons
+            valence_electrons = Species.get_valence_electrons(vpss)
+
+            # if up_dn_electrons is None, set up_dn_electrons to valence_electrons
+            if up_dn_diff is None:
+                up_dn_electrons = dict((vps.split('_')[0], {"up": valence_electrons[vps]/2, "dn": valence_electrons[vps]/2}) for vps in vpss)
+            # if up_dn_electrons is not None, check if the sum of up and dn is equal to valence_electrons
+            else:
+                up_dn_electrons = dict((vps.split('_')[0], {"up": valence_electrons[vps]/2 + up_dn_diff[vps.split('_')[0]]/2, "dn": valence_electrons[vps]/2 - up_dn_diff[vps.split('_')[0]]/2}) for vps in vpss)
+            
+            print(f"up_dn_electrons: {up_dn_electrons}")
+            # test if the sum of up and dn is equal to valence_electrons
+            if not all(sum(up_dn_electrons[vps.split('_')[0]].values()) == valence_electrons[vps] for vps in vpss):
+                raise ValueError(f"Sum of up and dn electrons is not equal to valence electrons for {element}")
+            
+            el_electrons_string = dict((vps.split('_')[0], f"{up_dn_electrons[vps.split('_')[0]]['up']} {up_dn_electrons[vps.split('_')[0]]['dn']}") for vps in vpss)
+
+            # get the up_dn_electrons_string
+            atoms_species_and_coordinates += f"{i+1} {element} {coordinates_string} {el_electrons_string[element]}\n"
+            # add spin up and spin down number of electrons based on 
+        
+        print(atoms_species_and_coordinates)
+
+        return None
+
+        # # get the unit vectors
+        # atoms_unit_vectors_unit = "Ang"
+        # atoms_unit_vectors = ""
+        # for vector in structure.lattice.matrix:
+        #     vector_string = " ".join([str(v) for v in vector])
+        #     atoms_unit_vectors += f"{vector_string}\n"
+
 
 class Scf(BaseFileWriter):
     def __init__(
@@ -250,3 +317,12 @@ if __name__ == "__main__":
     print(filename.get_string())
 
 
+    # Test get_valence_electrons
+    vpss = ["Ga_PBE19", "As_PBE19"]
+    print(Species.get_valence_electrons(vpss))
+
+
+    # Test get_atoms_from_pmg_structure
+    structure = Structure.from_file("POSCAR")
+    vpss = ["Ga_PBE19", "As_PBE19"]
+    Atoms.get_atoms_from_pmg_structure(structure, vpss, fractional_coordinates=True, up_dn_diff={"Ga": 0.5, "As": -1})
