@@ -1,3 +1,6 @@
+import yaml
+
+
 class BaseFileWriter:
     def __init__(self, template):
         self.template = template
@@ -44,6 +47,36 @@ class Species(BaseFileWriter):
         Definition.of.Atomic.Species>
         """
         super().__init__(template)
+
+    @classmethod
+    def get_species_from_vps_and_option(cls, vpss_and_options):
+        with open('potential_table.yaml', 'r') as file:
+            data = yaml.safe_load(file)
+
+        # order the vpss_and_options by the alphabetical order of the element
+        vpss_and_options = dict(sorted(vpss_and_options.items(), key=lambda item: item[0].split('_')[0]))
+        
+        output = ""
+        for vps, option in vpss_and_options.items():
+            # if option is not in the list of ["Quick", "Standard", "Precise"], raise ValueError
+            if option not in ["Quick", "Standard", "Precise"]:
+                raise ValueError(f"Option {option} not in list of options")
+            
+            # Find the dictionary with the matching VPS
+            for d in data:
+                if d['VPS'] == vps:
+                    element = vps.split('_')[0]
+                    pao_string = f"{element} {d[option]} {vps}"
+                    output += pao_string + "\n"
+                    break
+            else:
+                # If we get here, we didn't find a match
+                raise ValueError(f"VPS {vps} not found in PAO-table.yaml")
+
+        species_number = len(vpss_and_options)
+        # call __init__ to get the template
+        return Species(species_number=species_number, species_definition=output)
+
 
 
 
@@ -171,14 +204,14 @@ if __name__ == "__main__":
     filename = System(system_current_dir=".", system_name="test", level_of_stdout=1, level_of_fileout=1)
     print(filename.get_string())
 
-    species_number = 3
-    species_definition = """\
- Ga   Ga7.0-s2p2d1   Ga_CA19
- As   As7.0-s2p2d1   As_CA19
-proj  As7.0-s1p1d1   As_CA19
-        """
-    filename = Species(species_number=species_number, species_definition=species_definition)
-    print(filename.get_string())
+    # Test get_species_def_from_vps_and_option
+    inputs = {
+        "Ni_PBE19H": "Quick",
+        "Cu_PBE19H": "Quick",
+        "Mn_PBE19": "Quick",
+    }
+
+    print(Species.get_species_from_vps_and_option(inputs).get_string())
 
 
     atoms_number = 2
@@ -215,3 +248,5 @@ proj  As7.0-s1p1d1   As_CA19
 
     filename = MD(md_type="Opt", md_max_iter=1, md_time_step=0.5, md_opt_criterion=1.0e-4)
     print(filename.get_string())
+
+
