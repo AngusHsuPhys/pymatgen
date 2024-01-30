@@ -155,7 +155,6 @@ class Atoms(BaseFileWriter):
             else:
                 up_dn_electrons = dict((vps.split('_')[0], {"up": valence_electrons[vps]/2 + up_dn_diff[vps.split('_')[0]]/2, "dn": valence_electrons[vps]/2 - up_dn_diff[vps.split('_')[0]]/2}) for vps in vpss)
             
-            print(f"up_dn_electrons: {up_dn_electrons}")
             # test if the sum of up and dn is equal to valence_electrons
             if not all(sum(up_dn_electrons[vps.split('_')[0]].values()) == valence_electrons[vps] for vps in vpss):
                 raise ValueError(f"Sum of up and dn electrons is not equal to valence electrons for {element}")
@@ -166,17 +165,16 @@ class Atoms(BaseFileWriter):
             atoms_species_and_coordinates += f"{i+1} {element} {coordinates_string} {el_electrons_string[element]}\n"
             # add spin up and spin down number of electrons based on 
         
-        print(atoms_species_and_coordinates)
 
-        return None
+        # get the unit vectors
+        atoms_unit_vectors_unit = "Ang"
+        atoms_unit_vectors = ""
+        for vector in structure.lattice.matrix:
+            vector_string = " ".join([str(v) for v in vector])
+            atoms_unit_vectors += f"{vector_string}\n"
 
-        # # get the unit vectors
-        # atoms_unit_vectors_unit = "Ang"
-        # atoms_unit_vectors = ""
-        # for vector in structure.lattice.matrix:
-        #     vector_string = " ".join([str(v) for v in vector])
-        #     atoms_unit_vectors += f"{vector_string}\n"
 
+        return Atoms(atoms_number=atoms_number, atoms_species_and_coordinates_unit=atoms_species_and_coordinates_unit, atoms_species_and_coordinates=atoms_species_and_coordinates, atoms_unit_vectors_unit=atoms_unit_vectors_unit, atoms_unit_vectors=atoms_unit_vectors)
 
 class Scf(BaseFileWriter):
     def __init__(
@@ -325,4 +323,4 @@ if __name__ == "__main__":
     # Test get_atoms_from_pmg_structure
     structure = Structure.from_file("POSCAR")
     vpss = ["Ga_PBE19", "As_PBE19"]
-    Atoms.get_atoms_from_pmg_structure(structure, vpss, fractional_coordinates=True, up_dn_diff={"Ga": 0.5, "As": -1})
+    print(Atoms.get_atoms_from_pmg_structure(structure, vpss, fractional_coordinates=True, up_dn_diff={"Ga": 0.5, "As": -1}).get_string())
