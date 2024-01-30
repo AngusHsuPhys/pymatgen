@@ -12,11 +12,11 @@ class BaseFileWriter:
         return file_string
 
 class System(BaseFileWriter):
-    def __init__(self, system_current_dir, system_name, level_of_stdout, level_of_fileout):
-        self.system_current_dir = system_current_dir if system_current_dir else "."
+    def __init__(self, system_name, system_current_dir=".", level_of_stdout=1, level_of_fileout=1):
+        self.system_current_dir = system_current_dir
         self.system_name = system_name
-        self.level_of_stdout = level_of_stdout if level_of_stdout else 1
-        self.level_of_fileout = level_of_fileout if level_of_fileout else 1
+        self.level_of_stdout = level_of_stdout
+        self.level_of_fileout = level_of_fileout
 
         template = """\
         #
@@ -83,41 +83,41 @@ class Scf(BaseFileWriter):
         self, 
         xc_type, 
         spin_polarization, 
-        spin_orbit_coupling, 
-        electronic_temperature, 
-        energy_cutoff, 
-        max_iter, 
         eigenvalue_solver,
         kgrid, 
         generation_kpoint, 
         mixing_type, 
-        init_mixing_weight, 
-        min_mixing_weight, 
-        max_mixing_weight, 
-        mixing_history, 
-        start_pulay, 
-        every_pulay, 
-        criterion, 
-        lapack_dste
+        spin_orbit_coupling="off",
+        electronic_temperature=300,
+        energy_cutoff=150,
+        max_iter=40,
+        init_mixing_weight=0.30,
+        min_mixing_weight=0.001,
+        max_mixing_weight=0.40,
+        mixing_history=5,
+        start_pulay=6,
+        every_pulay=6,
+        criterion=1.0e-6,
+        lapack_dste="dstevx"
     ):
         self.xc_type = xc_type
         self.spin_polarization = spin_polarization
         self.spin_orbit_coupling = spin_orbit_coupling
-        self.electronic_temperature = electronic_temperature if electronic_temperature else 300
-        self.energy_cutoff = energy_cutoff if energy_cutoff else 150
-        self.max_iter = max_iter if max_iter else 40
+        self.electronic_temperature = electronic_temperature
+        self.energy_cutoff = energy_cutoff
+        self.max_iter = max_iter
         self.eigenvalue_solver = eigenvalue_solver
         self.kgrid = kgrid
         self.generation_kpoint = generation_kpoint
         self.mixing_type = mixing_type
-        self.init_mixing_weight = init_mixing_weight if init_mixing_weight else 0.30
-        self.min_mixing_weight = min_mixing_weight if min_mixing_weight else 0.001
-        self.max_mixing_weight = max_mixing_weight if max_mixing_weight else 0.40
-        self.mixing_history = mixing_history if mixing_history else 5
-        self.start_pulay = start_pulay if start_pulay else 6
-        self.every_pulay = every_pulay if every_pulay else 6
-        self.criterion = criterion if criterion else 1.0e-6
-        self.lapack_dste = lapack_dste if lapack_dste else "dstevx"
+        self.init_mixing_weight = init_mixing_weight
+        self.min_mixing_weight = min_mixing_weight
+        self.max_mixing_weight = max_mixing_weight
+        self.mixing_history = mixing_history
+        self.start_pulay = start_pulay
+        self.every_pulay = every_pulay
+        self.criterion = criterion
+        self.lapack_dste = lapack_dste
 
         template = """\
         #
@@ -146,11 +146,11 @@ class Scf(BaseFileWriter):
 
 
 class MD(BaseFileWriter):
-    def __init__(self, md_type, md_max_iter, md_time_step, md_opt_criterion):
+    def __init__(self, md_type, md_max_iter=1, md_time_step=0.5, md_opt_criterion=1.0e-4):
         self.md_type = md_type 
-        self.md_max_iter = md_max_iter if md_max_iter else 1
-        self.md_time_step = md_time_step if md_time_step else 0.5
-        self.md_opt_criterion = md_opt_criterion if md_opt_criterion else 1.0e-4
+        self.md_max_iter = md_max_iter
+        self.md_time_step = md_time_step
+        self.md_opt_criterion = md_opt_criterion
 
         template = """\
         #
@@ -194,4 +194,24 @@ proj  As7.0-s1p1d1   As_CA19
  5.367  5.367  0.000
  """
     filename = Atoms(atoms_number=atoms_number, atoms_species_and_coordinates_unit=atoms_species_and_coordinates_unit, atoms_species_and_coordinates=atoms_species_and_coordinates, atoms_unit_vectors_unit=atoms_unit_vectors_unit, atoms_unit_vectors=atoms_unit_vectors)
+    print(filename.get_string())
+
+    xc_type = "LSDA-CA"
+    spin_polarization = "off"
+    eigenvalue_solver = "band"
+    kgrid = "7 7 7"
+    generation_kpoint = "regular"
+    mixing_type = "Rmm-Diis"
+    
+    filename = Scf(
+        xc_type=xc_type, 
+        spin_polarization=spin_polarization,
+        eigenvalue_solver=eigenvalue_solver,
+        kgrid=kgrid, 
+        generation_kpoint=generation_kpoint, 
+        mixing_type=mixing_type, 
+    )
+    print(filename.get_string())
+
+    filename = MD(md_type="Opt", md_max_iter=1, md_time_step=0.5, md_opt_criterion=1.0e-4)
     print(filename.get_string())
