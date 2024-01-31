@@ -1,4 +1,4 @@
-import yaml, os
+import os
 from pymatgen.io.openmx.inputs import System, Species, Atoms, Scf, MD
 from pymatgen.io.vasp.inputs import Structure
 from monty.serialization import loadfn
@@ -11,58 +11,43 @@ class ScfInputSet:
 
     @classmethod
     def write_input(cls, system_name, structure):
+        # Initialize system with configuration values
+        system_config = cls.CONFIG["system"]
         system = System(
             system_name=system_name,
-            system_current_dir=cls.CONFIG["system"]["system_current_dir"],
-            level_of_stdout=cls.CONFIG["system"]["level_of_stdout"],
-            level_of_fileout=cls.CONFIG["system"]["level_of_fileout"],
+            system_current_dir=system_config["system_current_dir"],
+            level_of_stdout=system_config["level_of_stdout"],
+            level_of_fileout=system_config["level_of_fileout"],
         )
 
+        # Extract unique elements from structure
+        unique_elements = list(set(site.specie.symbol for site in structure))
 
-        # get element list of structure
-        element_list = []
-        for site in structure:
-            element_list.append(site.specie.symbol)
-        
-        #remove duplicate element
-        element_list = list(set(element_list))
+        # Create species from configuration
+        species_config = cls.CONFIG["species"]["vpss_and_options"]
+        species_list = [species_config[element] for element in unique_elements]
+        merged_species = dict(item for species_dict in species_list for item in species_dict.items())
+        species = Species.get_species_from_vps_and_option(merged_species)
 
-        # create species
-        vpss_and_options = list()
-        for element in element_list:
-            vpss_and_options.append(cls.CONFIG["species"]["vpss_and_options"][element])
-        
-        vpss_and_options = dict(item for item in vpss_and_options for item in item.items())
-        species = Species.get_species_from_vps_and_option(vpss_and_options)
-
-        # create atoms
+        # Create atoms from configuration
+        atoms_config = cls.CONFIG["atoms"]
         atoms = Atoms.get_atoms_from_pmg_structure(
             structure=structure, 
-            vpss=vpss_and_options.keys(),
-            fractional_coordinates=cls.CONFIG["atoms"]["fractional_coordinates"],
-            up_dn_diff=None if cls.CONFIG["atoms"]["up_dn_diff"] == "None" else cls.CONFIG["atoms"]["up_dn_diff"],
+            vpss=merged_species.keys(),
+            fractional_coordinates=atoms_config["fractional_coordinates"],
+            up_dn_diff=None if atoms_config["up_dn_diff"] == "None" else atoms_config["up_dn_diff"],
         )
 
-        # create scf
-        scf_config = cls.CONFIG["scf"]
-        scf = Scf.get_scf_with_pmg_kgrid(
-            structure=structure,
-            **scf_config
-        )
+        # Create scf from configuration
+        scf = Scf.get_scf_with_pmg_kgrid(structure=structure, **cls.CONFIG["scf"])
 
-        # create md
-        md_config = cls.CONFIG["md"]
-        md = MD(**md_config)
+        # Create md from configuration
+        md = MD(**cls.CONFIG["md"])
 
+        # Concatenate input strings
+        input_str = system.get_string() + species.get_string() + atoms.get_string() + scf.get_string() + md.get_string()
 
-        # write input
-        input_str = ""
-        input_str += system.get_string()
-        input_str += species.get_string()
-        input_str += atoms.get_string()
-        input_str += scf.get_string()
-        input_str += md.get_string()
-
+        # Write input string to file
         with open("input.dat", "w") as f:
             f.write(input_str)
 
