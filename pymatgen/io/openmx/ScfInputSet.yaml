@@ -164,7 +164,9 @@ species:
 
 atoms:
   fractional_coordinates: true
-  up_dn_diff: None
+  up_dn_diff: 
+    Ga: 1
+    As: 0
 
 scf:
   kppa: 64
