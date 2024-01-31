@@ -4,6 +4,8 @@ import yaml
 from pymatgen.io.vasp.inputs import Structure, Kpoints
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
+with open(f"{MODULE_DIR}/potential_table.yaml", 'r') as file:
+    PAO_TABLE = yaml.safe_load(file)
 
 class BaseFileWriter:
     def __init__(self, template):
@@ -54,9 +56,6 @@ class Species(BaseFileWriter):
 
     @classmethod
     def get_species_from_vps_and_option(cls, vpss_and_options):
-        with open(f"{MODULE_DIR}/potential_table.yaml", 'r') as file:
-            data = yaml.safe_load(file)
-
         output = ""
         for vps, option in vpss_and_options.items():
             # if option is not in the list of ["Quick", "Standard", "Precise"], raise ValueError
@@ -64,7 +63,7 @@ class Species(BaseFileWriter):
                 raise ValueError(f"Option {option} not in list of options")
             
             # Find the dictionary with the matching VPS
-            for d in data:
+            for d in PAO_TABLE:
                 if d['VPS'] == vps:
                     element = vps.split('_')[0]
                     pao_string = f"{element} {d[option]} {vps}"
@@ -80,13 +79,10 @@ class Species(BaseFileWriter):
     
     @classmethod
     def get_valence_electrons(cls, vpss):
-        with open(f"{MODULE_DIR}/potential_table.yaml", 'r') as file:
-            data = yaml.safe_load(file)
-
         valence_electrons = {}
         for vps in vpss:
             # Find the dictionary with the matching VPS
-            for d in data:
+            for d in PAO_TABLE:
                 if d['VPS'] == vps:
                     valence_electrons[vps] = d['Valence electrons']
                     break
