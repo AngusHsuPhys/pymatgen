@@ -1,6 +1,9 @@
-import yaml
-from pymatgen.io.vasp.inputs import Structure
 
+import os
+import yaml
+from pymatgen.io.vasp.inputs import Structure, Kpoints
+
+MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class BaseFileWriter:
     def __init__(self, template):
@@ -51,11 +54,8 @@ class Species(BaseFileWriter):
 
     @classmethod
     def get_species_from_vps_and_option(cls, vpss_and_options):
-        with open('potential_table.yaml', 'r') as file:
+        with open(f"{MODULE_DIR}/potential_table.yaml", 'r') as file:
             data = yaml.safe_load(file)
-
-        # order the vpss_and_options by the alphabetical order of the element
-        vpss_and_options = dict(sorted(vpss_and_options.items(), key=lambda item: item[0].split('_')[0]))
 
         output = ""
         for vps, option in vpss_and_options.items():
@@ -80,7 +80,7 @@ class Species(BaseFileWriter):
     
     @classmethod
     def get_valence_electrons(cls, vpss):
-        with open('potential_table.yaml', 'r') as file:
+        with open(f"{MODULE_DIR}/potential_table.yaml", 'r') as file:
             data = yaml.safe_load(file)
 
         valence_electrons = {}
@@ -179,15 +179,14 @@ class Atoms(BaseFileWriter):
 class Scf(BaseFileWriter):
     def __init__(
         self, 
-        xc_type, 
-        spin_polarization, 
-        eigenvalue_solver,
         kgrid, 
-        generation_kpoint, 
-        mixing_type, 
+        xc_type="GGA-PBE",
+        spin_polarization="off", 
+        eigenvalue_solver="Band",
+        mixing_type="Simple",
         spin_orbit_coupling="off",
         electronic_temperature=300,
-        energy_cutoff=150,
+        energy_cutoff=200,
         max_iter=40,
         init_mixing_weight=0.30,
         min_mixing_weight=0.001,
@@ -196,7 +195,8 @@ class Scf(BaseFileWriter):
         start_pulay=6,
         every_pulay=6,
         criterion=1.0e-6,
-        lapack_dste="dstevx"
+        lapack_dste="dstevx",
+        generation_kpoint="regular",
     ):
         self.xc_type = xc_type
         self.spin_polarization = spin_polarization
@@ -206,7 +206,6 @@ class Scf(BaseFileWriter):
         self.max_iter = max_iter
         self.eigenvalue_solver = eigenvalue_solver
         self.kgrid = kgrid
-        self.generation_kpoint = generation_kpoint
         self.mixing_type = mixing_type
         self.init_mixing_weight = init_mixing_weight
         self.min_mixing_weight = min_mixing_weight
@@ -216,6 +215,7 @@ class Scf(BaseFileWriter):
         self.every_pulay = every_pulay
         self.criterion = criterion
         self.lapack_dste = lapack_dste
+        self.generation_kpoint = generation_kpoint
 
         template = """\
         #
@@ -242,6 +242,22 @@ class Scf(BaseFileWriter):
         """
         super().__init__(template)
 
+    @classmethod
+    def get_kgrid_from_pmg_structure(cls, structure, kppa, force_gamma=False):
+        kpoints = Kpoints.automatic_density(structure, kppa, force_gamma)
+        kgrid = kpoints.as_dict()["kpoints"][0]
+        kgrid = " ".join([str(k) for k in kgrid])
+        return kgrid
+    
+    @classmethod
+    # initialize the class with the kgrid from get_kgrid_from_pmg_structure
+    def get_scf_with_pmg_kgrid(cls, structure, kppa=64, force_gamma=False, **kwargs):
+        kgrid = cls.get_kgrid_from_pmg_structure(structure, kppa, force_gamma)
+        return cls(kgrid, **kwargs)
+    
+
+
+
 
 class MD(BaseFileWriter):
     def __init__(self, md_type, md_max_iter=1, md_time_step=0.5, md_opt_criterion=1.0e-4):
@@ -266,61 +282,26 @@ class MD(BaseFileWriter):
 
 
 if __name__ == "__main__":
-    filename = System(system_current_dir=".", system_name="test", level_of_stdout=1, level_of_fileout=1)
-    print(filename.get_string())
+    system = System(system_current_dir=".", system_name="test", level_of_stdout=1, level_of_fileout=1)
+    print(system.get_string())
 
-    # Test get_species_def_from_vps_and_option
-    inputs = {
-        "Ni_PBE19H": "Quick",
-        "Cu_PBE19H": "Quick",
-        "Mn_PBE19": "Quick",
-    }
-
-    print(Species.get_species_from_vps_and_option(inputs).get_string())
-
-
-    atoms_number = 2
-    atoms_species_and_coordinates_unit = "FRAC"
-    atoms_species_and_coordinates = """\
- 1  Ga  0.0000  0.0000  0.0000   6.5 6.5  0.0 0.0 0.0 0.0 1
- 2  As  0.2500  0.2500  0.2500   7.5 7.5  0.0 0.0 0.0 0.0 1
- """
-    atoms_unit_vectors_unit = "Au"
-    atoms_unit_vectors = """\
- 5.367  0.000  5.367
- 0.000  5.367  5.367
- 5.367  5.367  0.000
- """
-    filename = Atoms(atoms_number=atoms_number, atoms_species_and_coordinates_unit=atoms_species_and_coordinates_unit, atoms_species_and_coordinates=atoms_species_and_coordinates, atoms_unit_vectors_unit=atoms_unit_vectors_unit, atoms_unit_vectors=atoms_unit_vectors)
-    print(filename.get_string())
-
-    xc_type = "LSDA-CA"
-    spin_polarization = "off"
-    eigenvalue_solver = "band"
-    kgrid = "7 7 7"
-    generation_kpoint = "regular"
-    mixing_type = "Rmm-Diis"
-    
-    filename = Scf(
-        xc_type=xc_type, 
-        spin_polarization=spin_polarization,
-        eigenvalue_solver=eigenvalue_solver,
-        kgrid=kgrid, 
-        generation_kpoint=generation_kpoint, 
-        mixing_type=mixing_type, 
-    )
-    print(filename.get_string())
-
-    filename = MD(md_type="Opt", md_max_iter=1, md_time_step=0.5, md_opt_criterion=1.0e-4)
-    print(filename.get_string())
-
-
-    # Test get_valence_electrons
-    vpss = ["Ga_PBE19", "As_PBE19"]
-    print(Species.get_valence_electrons(vpss))
-
+    #test get_species_from_vps_and_option
+    vpss_and_options = {"Ga_PBE19": "Quick", "As_PBE19": "Quick"}
+    species = Species.get_species_from_vps_and_option(vpss_and_options)
+    print(species.get_string())
 
     # Test get_atoms_from_pmg_structure
-    structure = Structure.from_file("POSCAR")
+    structure = Structure.from_file(f"{MODULE_DIR}/POSCAR")
     vpss = ["Ga_PBE19", "As_PBE19"]
     print(Atoms.get_atoms_from_pmg_structure(structure, vpss, fractional_coordinates=True, up_dn_diff={"Ga": 0.5, "As": -1}).get_string())
+
+
+    # Test get_scf_with_pmg_kgrid
+    structure = Structure.from_file(f"{MODULE_DIR}/POSCAR")
+    scf = Scf.get_scf_with_pmg_kgrid(structure, kppa=64, force_gamma=False)
+    print(scf.get_string())
+
+
+    md = MD(md_type="nomd", md_max_iter=1, md_time_step=0.5, md_opt_criterion=1.0e-4)
+    print(md.get_string())
+
