@@ -47,10 +47,6 @@ class ScfInputSet:
         # Concatenate input strings
         input_str = system.get_string() + species.get_string() + atoms.get_string() + scf.get_string() + md.get_string()
 
-        # Write input string to file
-        with open("input.dat", "w") as f:
-            f.write(input_str)
-
         return input_str
     
 
