@@ -253,8 +253,6 @@ class Scf(BaseFileWriter):
     
 
 
-
-
 class MD(BaseFileWriter):
     def __init__(self, md_type, md_max_iter=1, md_time_step=0.5, md_opt_criterion=1.0e-4):
         self.md_type = md_type 
