@@ -1,11 +1,9 @@
-
 import os
-import yaml
+from monty.serialization import loadfn
 from pymatgen.io.vasp.inputs import Structure, Kpoints
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
-with open(f"{MODULE_DIR}/potential_table.yaml", 'r') as file:
-    PAO_TABLE = yaml.safe_load(file)
+PAO_TABLE = loadfn(os.path.join(MODULE_DIR, "potential_table.yaml"))
 
 class BaseFileWriter:
     def __init__(self, template):
@@ -150,7 +148,8 @@ class Atoms(BaseFileWriter):
             # if up_dn_electrons is not None, check if the sum of up and dn is equal to valence_electrons
             else:
                 up_dn_electrons = dict((vps.split('_')[0], {"up": valence_electrons[vps]/2 + up_dn_diff[vps.split('_')[0]]/2, "dn": valence_electrons[vps]/2 - up_dn_diff[vps.split('_')[0]]/2}) for vps in vpss)
-            
+        
+
             # test if the sum of up and dn is equal to valence_electrons
             if not all(sum(up_dn_electrons[vps.split('_')[0]].values()) == valence_electrons[vps] for vps in vpss):
                 raise ValueError(f"Sum of up and dn electrons is not equal to valence electrons for {element}")
