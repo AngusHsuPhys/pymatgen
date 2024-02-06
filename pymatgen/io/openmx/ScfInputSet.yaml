@@ -162,12 +162,6 @@ species:
     Zr:
       Zr_PBE19: Standard
 
-atoms:
-  fractional_coordinates: true
-  up_dn_diff: 
-    Ga: 1
-    As: 0
-
 scf:
   kppa: 64
   force_gamma: false
@@ -186,7 +180,6 @@ scf:
   start_pulay: 6
   every_pulay: 6
   criterion: 1.0e-6
-  lapack_dste: "dstevx"
   generation_kpoint: "regular"
 
 md:

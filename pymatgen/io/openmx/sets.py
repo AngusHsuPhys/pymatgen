@@ -1,5 +1,5 @@
 import os
-from pymatgen.io.openmx.inputs import System, Species, Atoms, Scf, MD
+from pymatgen.io.openmx.inputs import System, Species, Scf, MD
 from pymatgen.io.vasp.inputs import Structure
 from monty.serialization import loadfn
 
@@ -29,14 +29,6 @@ class ScfInputSet:
         merged_species = dict(item for species_dict in species_list for item in species_dict.items())
         species = Species.get_species_from_vps_and_option(merged_species)
 
-        # Create atoms from configuration
-        atoms_config = cls.CONFIG["atoms"]
-        atoms = Atoms.get_atoms_from_pmg_structure(
-            structure=structure, 
-            vpss=merged_species.keys(),
-            fractional_coordinates=atoms_config["fractional_coordinates"],
-            up_dn_diff=None if atoms_config["up_dn_diff"] == "None" else atoms_config["up_dn_diff"],
-        )
 
         # Create scf from configuration
         scf = Scf.get_scf_with_pmg_kgrid(structure=structure, **cls.CONFIG["scf"])
@@ -45,9 +37,12 @@ class ScfInputSet:
         md = MD(**cls.CONFIG["md"])
 
         # Concatenate input strings
-        input_str = system.get_string() + species.get_string() + atoms.get_string() + scf.get_string() + md.get_string()
+        input = {}
+        for obj in [system, species, scf, md]:
+            input.update(obj.template)
 
-        return input_str
+        print(input)
+        return input
     
 
 
