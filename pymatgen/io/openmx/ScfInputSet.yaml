@@ -190,7 +190,7 @@ scf:
   generation_kpoint: "regular"
 
 md:
-  md_type: nomad
+  md_type: nomd
   md_max_iter: 1
   md_time_step: 0.5
   md_opt_criterion: 1.0e-4
