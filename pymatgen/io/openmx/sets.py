@@ -8,43 +8,47 @@ MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class ScfInputSet:
-    CONFIG = loadfn(os.path.join(MODULE_DIR, "ScfInputSet.yaml"))
+    def __init__(self, structure=None, **kwargs):
+        self.structure = structure
+        self.CONFIG = loadfn(os.path.join(MODULE_DIR, "ScfInputSet.yaml"))
 
-    @classmethod
-    def write_input(cls, structure):
-        # Initialize system with configuration values
-        system_config = cls.CONFIG["system"]
-        system = System(**system_config)
+        self.system()
+        self.species()
+        self.scf()
+        self.md()
 
-        # Extract unique elements from structure
-        unique_elements = list(set(site.specie.symbol for site in structure))
+        self.set = self.set(**kwargs)
 
-        # Create species from configuration
-        species_config = cls.CONFIG["species"]["vpss_and_options"]
+
+    def system(self):
+        self.system = System(**self.CONFIG["system"])
+
+    def species(self): 
+        unique_elements = list(set(site.specie.symbol for site in self.structure))
+        species_config = self.CONFIG["species"]["vpss_and_options"]
         species_list = [species_config[element] for element in unique_elements]
         merged_species = dict(item for species_dict in species_list for item in species_dict.items())
-        species = Species.get_species_from_vps_and_option(merged_species)
+        self.species = Species.get_species_from_vps_and_option(merged_species)
 
+    def scf(self):
+        self.scf = Scf.get_scf_with_pmg_kgrid(self.structure, **self.CONFIG["scf"])
 
-        # Create scf from configuration
-        scf = Scf.get_scf_with_pmg_kgrid(structure=structure, **cls.CONFIG["scf"])
+    def md(self):
+        self.md = MD(**self.CONFIG["md"])
 
-        # Create md from configuration
-        md = MD(**cls.CONFIG["md"])
-
-        # Concatenate input strings
+    def set(self, **kwargs):
         input = {}
-        for obj in [system, species, scf, md]:
+        for obj in [self.system, self.species, self.scf, self.md]:
             input.update(obj.template)
 
-        print(input)
+        input.update(kwargs)
         return input
-    
-
 
 if __name__ == "__main__":
-    scf_input_set = ScfInputSet()
     structure = Structure.from_file("POSCAR")
-    scf_input_set.write_input(structure)
+
+    scf_input = ScfInputSet(structure, system_currentdirectory=".", level_of_stdout=2)
+    print(scf_input.set)
+    
 
 
