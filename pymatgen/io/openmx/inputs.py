@@ -75,7 +75,6 @@ class Scf(BaseFileWriter):
         start_pulay=6,
         every_pulay=6,
         criterion=1.0e-6,
-        generation_kpoint="regular",
     ):
         template = {
             'scf_xctype': xc_type,
@@ -102,7 +101,11 @@ class Scf(BaseFileWriter):
     def get_kgrid_from_pmg_structure(cls, structure, kppa, force_gamma=False):
         kpoints = Kpoints.automatic_density(structure, kppa, force_gamma)
         kgrid = kpoints.as_dict()["kpoints"][0]
-        kgrid = " ".join([str(k) for k in kgrid])
+        kgrid = (kgrid[0], kgrid[1], kgrid[2])
+        # if any in kgrid is not even, add 1 to it
+        for i in range(3):
+            if kgrid[i] % 2 != 0:
+                kgrid[i] += 1
         return kgrid
     
     @classmethod
