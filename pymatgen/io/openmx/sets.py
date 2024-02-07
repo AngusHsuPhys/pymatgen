@@ -11,14 +11,11 @@ class ScfInputSet:
     def __init__(self, structure=None, **kwargs):
         self.structure = structure
         self.CONFIG = loadfn(os.path.join(MODULE_DIR, "ScfInputSet.yaml"))
-
+        self.input_params = kwargs if kwargs else {}
         self.system()
         self.species()
         self.scf()
         self.md()
-
-        self.set = self.set(**kwargs)
-
 
     def system(self):
         self.system = System(**self.CONFIG["system"])
@@ -36,19 +33,20 @@ class ScfInputSet:
     def md(self):
         self.md = MD(**self.CONFIG["md"])
 
-    def set(self, **kwargs):
+    def as_dict(self):
         input = {}
+
         for obj in [self.system, self.species, self.scf, self.md]:
             input.update(obj.template)
 
-        input.update(kwargs)
+        input.update(self.input_params)
         return input
 
 if __name__ == "__main__":
     structure = Structure.from_file("POSCAR")
 
     scf_input = ScfInputSet(structure, system_currentdirectory=".", level_of_stdout=2)
-    print(scf_input.set)
+    print(scf_input.as_dict())
     
 
 
