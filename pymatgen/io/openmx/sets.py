@@ -13,9 +13,9 @@ class ScfInputSet:
         # Initialize system with configuration values
         system_config = cls.CONFIG["system"]
         system = System(
-            system_current_dir=system_config["system_current_dir"],
-            level_of_stdout=system_config["level_of_stdout"],
-            level_of_fileout=system_config["level_of_fileout"],
+            system_current_dir=system_config.get("system_current_dir", "./"),
+            level_of_stdout=system_config.get("level_of_stdout", 1),
+            level_of_fileout=system_config.get("level_of_fileout", 1)
         )
 
         # Extract unique elements from structure
