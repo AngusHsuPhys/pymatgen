@@ -1,7 +1,7 @@
 system:
   system_current_dir: "./"
   level_of_stdout: 1
-  level_of_fileout: 1
+  level_of_fileout: 0
 
 species:
   vpss_and_options:
