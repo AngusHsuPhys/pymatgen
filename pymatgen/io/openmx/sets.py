@@ -47,6 +47,6 @@ class ScfInputSet:
 if __name__ == "__main__":
     scf_input_set = ScfInputSet()
     structure = Structure.from_file("POSCAR")
-    scf_input_set.write_input("GaAs", structure)
+    scf_input_set.write_input(structure)
 
 

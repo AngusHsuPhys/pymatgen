@@ -13,10 +13,9 @@ class BaseFileWriter:
         dumpfn(self.template, "temp.yaml")
 
 class System(BaseFileWriter):
-    def __init__(self, system_name, system_current_dir=".", level_of_stdout=1, level_of_fileout=1):
+    def __init__(self, system_current_dir=".", level_of_stdout=1, level_of_fileout=1):
         template = {
             "system_currentdirectory": system_current_dir,  
-            "system_name": system_name,
             "level_of_stdout": level_of_stdout,
             "level_of_fileout": level_of_fileout
         }
