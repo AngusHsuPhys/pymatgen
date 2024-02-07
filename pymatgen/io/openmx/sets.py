@@ -5,6 +5,8 @@ from monty.serialization import loadfn, dumpfn
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+
+
 class ScfInputSet:
     CONFIG = loadfn(os.path.join(MODULE_DIR, "ScfInputSet.yaml"))
 
@@ -12,11 +14,7 @@ class ScfInputSet:
     def write_input(cls, structure):
         # Initialize system with configuration values
         system_config = cls.CONFIG["system"]
-        system = System(
-            system_current_dir=system_config.get("system_current_dir", "./"),
-            level_of_stdout=system_config.get("level_of_stdout", 1),
-            level_of_fileout=system_config.get("level_of_fileout", 1)
-        )
+        system = System(**system_config)
 
         # Extract unique elements from structure
         unique_elements = list(set(site.specie.symbol for site in structure))
