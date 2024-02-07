@@ -169,7 +169,7 @@ scf:
   spin_polarization: "off"
   eigenvalue_solver: "Band"
   mixing_type: "Simple"
-  spin_orbit_coupling: "off"
+  spin_orbit_coupling: false
   electronic_temperature: 300
   energy_cutoff: 200
   max_iter: 40
@@ -180,7 +180,6 @@ scf:
   start_pulay: 6
   every_pulay: 6
   criterion: 1.0e-6
-  generation_kpoint: "regular"
 
 md:
   md_type: nomd
