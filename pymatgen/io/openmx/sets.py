@@ -1,20 +1,18 @@
 import os
 from pymatgen.io.openmx.inputs import System, Species, Scf, MD
 from pymatgen.io.vasp.inputs import Structure
-from monty.serialization import loadfn
+from monty.serialization import loadfn, dumpfn
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
-
 
 class ScfInputSet:
     CONFIG = loadfn(os.path.join(MODULE_DIR, "ScfInputSet.yaml"))
 
     @classmethod
-    def write_input(cls, system_name, structure):
+    def write_input(cls, structure):
         # Initialize system with configuration values
         system_config = cls.CONFIG["system"]
         system = System(
-            system_name=system_name,
             system_current_dir=system_config["system_current_dir"],
             level_of_stdout=system_config["level_of_stdout"],
             level_of_fileout=system_config["level_of_fileout"],
