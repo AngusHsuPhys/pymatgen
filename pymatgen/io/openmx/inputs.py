@@ -1,3 +1,8 @@
+"""
+Fields must be in the https://gitlab.com/ase/ase/-/blob/master/ase/calculators/openmx/parameters.py?ref_type=heads
+"""
+
+
 import os
 from monty.serialization import loadfn, dumpfn
 from pymatgen.io.vasp.inputs import Structure, Kpoints
