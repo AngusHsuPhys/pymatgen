@@ -1,5 +1,6 @@
 system:
   system_current_dir: "./"
+  hs_fileout: "on"
   level_of_stdout: 1
   level_of_fileout: 1
 
@@ -166,7 +167,6 @@ scf:
   kppa: 64
   force_gamma: false
   xc_type: "GGA-PBE"
-  hs_fileout: "on"
   spin_polarization: "off"
   eigenvalue_solver: "Band"
   mixing_type: "Simple"
