@@ -166,6 +166,7 @@ scf:
   kppa: 64
   force_gamma: false
   xc_type: "GGA-PBE"
+  hs_fileout: "on"
   spin_polarization: "off"
   eigenvalue_solver: "Band"
   mixing_type: "Simple"
