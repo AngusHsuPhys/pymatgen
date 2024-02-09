@@ -13,12 +13,15 @@ class BaseFileWriter:
         dumpfn(self.template, "temp.yaml")
 
 class System(BaseFileWriter):
-    def __init__(self, system_current_dir=".", level_of_stdout=1, level_of_fileout=1):
+    def __init__(self, system_current_dir=".", level_of_stdout=1, level_of_fileout=1, **kwargs):
         template = {
             "system_currentdirectory": system_current_dir,  
             "level_of_stdout": level_of_stdout,
-            "level_of_fileout": level_of_fileout
+            "level_of_fileout": level_of_fileout,
         }
+
+        # allow template to be updated with kwargs
+        template.update(kwargs)
 
         super().__init__(template)
 
