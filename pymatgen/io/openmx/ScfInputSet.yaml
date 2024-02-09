@@ -1,6 +1,6 @@
 system:
   system_current_dir: "./"
-  hs_fileout: "on"
+  hs_fileout: true
   level_of_stdout: 1
   level_of_fileout: 1
 

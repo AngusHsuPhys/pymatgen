@@ -13,7 +13,7 @@ class BaseFileWriter:
         dumpfn(self.template, "temp.yaml")
 
 class System(BaseFileWriter):
-    def __init__(self, system_current_dir=".", level_of_stdout=1, level_of_fileout=1, **kwargs):
+    def __init__(self, system_current_dir=".", level_of_stdout=1, level_of_fileout=1, **system_settings):
         template = {
             "system_currentdirectory": system_current_dir,  
             "level_of_stdout": level_of_stdout,
@@ -21,7 +21,7 @@ class System(BaseFileWriter):
         }
 
         # allow template to be updated with kwargs
-        template.update(kwargs)
+        template.update(system_settings)
 
         super().__init__(template)
 
@@ -77,6 +77,7 @@ class Scf(BaseFileWriter):
         start_pulay=6,
         every_pulay=6,
         criterion=1.0e-6,
+        **scf_settings
     ):
         template = {
             'scf_xctype': xc_type,
@@ -96,6 +97,9 @@ class Scf(BaseFileWriter):
             'scf_mixing_everypulay': every_pulay,
             'scf_criterion': criterion,
         }
+
+        # allow template to be updated with kwargs
+        template.update(scf_settings)
 
         super().__init__(template)
 
@@ -119,7 +123,7 @@ class Scf(BaseFileWriter):
 
 
 class MD(BaseFileWriter):
-    def __init__(self, md_type, md_max_iter=1, md_time_step=0.5, md_opt_criterion=1.0e-4):
+    def __init__(self, md_type, md_max_iter=1, md_time_step=0.5, md_opt_criterion=1.0e-4, **md_settings):
         self.md_type = md_type 
         self.md_max_iter = md_max_iter
         self.md_time_step = md_time_step
@@ -131,6 +135,10 @@ class MD(BaseFileWriter):
             "md_timestep": md_time_step,
             "md_opt_criterion": md_opt_criterion
         }
+
+        # allow template to be updated with kwargs
+        template.update(md_settings)
+        
         super().__init__(template)
 
 
