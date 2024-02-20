@@ -173,7 +173,7 @@ scf:
   spin_orbit_coupling: false
   electronic_temperature: 300
   energy_cutoff: 200
-  max_iter: 40
+  max_iter: 100
   init_mixing_weight: 0.30
   min_mixing_weight: 0.001
   max_mixing_weight: 0.40
