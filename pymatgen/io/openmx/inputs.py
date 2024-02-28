@@ -115,8 +115,13 @@ class Scf(BaseFileWriter):
         kgrid = (kgrid[0], kgrid[1], kgrid[2])
         # if any in kgrid is not even, add 1 to it
         for i in range(3):
-            if kgrid[i] % 2 != 0:
-                kgrid[i] += 1
+            print(f"{i}: {kgrid[i]}")
+            if kgrid[i] % 2 == 0:
+                print("even, adding 1")
+                new_k = kgrid[i] + 1
+                kgrid = list(kgrid)
+                kgrid[i] = new_k
+                kgrid = tuple(kgrid)
         return kgrid
     
     @classmethod
