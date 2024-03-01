@@ -28,6 +28,10 @@ class ScfInputSet:
         self.species = Species.get_species_from_vps_and_option(merged_species)
 
     def scf(self):
+        # if self.input_params.get("kppa"):
+        #update the kppa in the scf config
+        if self.input_params.get("kppa"):
+            self.CONFIG["scf"]["kppa"] = self.input_params["kppa"]   
         self.scf = Scf.get_scf_with_pmg_kgrid(self.structure, **self.CONFIG["scf"])
 
     def md(self):
