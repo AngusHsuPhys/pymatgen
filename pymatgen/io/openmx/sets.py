@@ -43,6 +43,10 @@ class ScfInputSet:
         for obj in [self.system, self.species, self.scf, self.md]:
             input.update(obj.template)
 
+        # remove kppa from input_params
+        if self.input_params.get("kppa"):
+            del self.input_params["kppa"]
+            
         input.update(self.input_params)
         return input
 
