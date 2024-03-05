@@ -24,6 +24,21 @@ class ScfInputSet:
         unique_elements = list(set(site.specie.symbol for site in self.structure))
         species_config = self.CONFIG["species"]["vpss_and_options"]
         species_list = [species_config[element] for element in unique_elements]
+        # This species list looks like: [{"Ag_PBE19": "Quick"}, {"O_PBE19": "Quick"}...]
+        if self.input_params.get("potcar_spec"):
+            # this looks like: {"Ag": "Standard", "O": "Quick"}
+            elements = self.input_params["potcar_spec"].keys()
+            options = self.input_params["potcar_spec"].values()
+            # I want to revise species_list to look like: [{"Ag_PBE19": "Standard"}, {"O_PBE19": "Quick"}...]
+            for species_dict in species_list:
+                for element, option in zip(elements, options):
+                    if element in species_dict:
+                        vps = species_config[element]
+                        # vps looks like: {"Ag_PBE19": "Quick"}
+                        # get key from vps
+                        vps = list(vps.keys())[0]
+                        species_dict[vps] = option
+
         merged_species = dict(item for species_dict in species_list for item in species_dict.items())
         self.species = Species.get_species_from_vps_and_option(merged_species)
 
