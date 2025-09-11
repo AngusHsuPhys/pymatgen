@@ -9,11 +9,11 @@ import os
 os.chdir(os.path.dirname(__file__))
 
 # add environment variables, export OPENMX_DFT_DATA_PATH=/openmx/DFT_DATA13
-os.environ["OPENMX_DFT_DATA_PATH"] = "/workspaces/openmx-wf/ASE/DFT_DATA19"
+os.environ["OPENMX_DFT_DATA_PATH"] = "/global/cfs/cdirs/m225/angush/openmx/DFT_DATA19"
 os.environ["ASE_OPENMX_COMMAND"] = "openmx"
 
 # st = Structure.from_file("/workspaces/openmx-wf/Atomate/launch-wf/C.cif")
-st = Structure.from_file("GaAs.vasp")
+st = Structure.from_file("./POSCAR")
 
 atom_adaptor = AseAtomsAdaptor()
 
@@ -34,7 +34,8 @@ inputs = dict(
     scf_energycutoff=200.0,
     scf_eigenvaluesolver="Band",
     md_type="nomd",
-
+    scf_proexpn_vna=False,
+    scf_criterion=3.67e-08,
     # definition_of_atomic_species=species,
 )
 

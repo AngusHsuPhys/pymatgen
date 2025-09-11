@@ -187,3 +187,14 @@ md:
   md_max_iter: 1
   md_time_step: 0.5
   md_opt_criterion: 1.0e-4
+
+
+# TRYING TO ADD THIS SO OPENMX CAN GIVE THIS DIRECTLY, BUT SEEMS LIKE ASE DOES NOT SUPPORT THIS SECTION.
+# CDDF:
+#   CDDF.start:                         on     # default = off , on|off
+#   CDDF.FWHM:                          0.1    # default =  0.2 eV
+#   CDDF.maximum_energy:               50.0    # default = 10.0 eV
+#   CDDF.minimum_energy:                0.0    # default =  0.0 eV
+#   CDDF.frequency.grid.total_number:  2001   # default = 10000 grids
+#   CDDF.material_type:                 1  
+#   CDDF.Kgrid:                       20 20 20

@@ -16,6 +16,7 @@ class ScfInputSet:
         self.species()
         self.scf()
         self.md()
+        # self.optical_conductivity()
 
     def system(self):
         self.system = System(**self.CONFIG["system"])
@@ -50,18 +51,32 @@ class ScfInputSet:
     def md(self):
         self.md = MD(**self.CONFIG["md"])
 
+    # def optical_conductivity(self):
+    #     if self.input_params.get("CDDF") == "off":
+    #         self.optical_conductivity = None
+    #     elif self.input_params.get("CDDF") == "on":
+    #         self.optical_conductivity = CDDF(**self.CONFIG["CDDF"])
+    #         if self.input_params.get("kgrid_density"):
+    #             # self.CONFIG["CDDF"]["kgrid_density"] = self.input_params["kgrid_density"]  
+    #             self.optical_conductivity = CDDF.get_optcond_with_pmg_kgrid(self.structure, self.input_params["kgrid_density"] )
+
+
     def as_dict(self):
         input = {}
 
         for obj in [self.system, self.species, self.scf, self.md]:
             input.update(obj.template)
 
-        # remove kppa from input_params
+        # # Include OpticalConductivity settings if available
+        # if self.optical_conductivity:
+        #     input.update(self.optical_conductivity.template)
+        # Remove kppa if it was in input_params
         if self.input_params.get("kppa"):
             del self.input_params["kppa"]
             
         input.update(self.input_params)
         return input
+
 
 if __name__ == "__main__":
     structure = Structure.from_file("POSCAR")

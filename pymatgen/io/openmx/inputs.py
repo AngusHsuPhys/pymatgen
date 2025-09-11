@@ -6,6 +6,7 @@ Fields must be in the https://gitlab.com/ase/ase/-/blob/master/ase/calculators/o
 import os
 from monty.serialization import loadfn, dumpfn
 from pymatgen.io.vasp.inputs import Structure, Kpoints
+import numpy as np 
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 PAO_TABLE = loadfn(os.path.join(MODULE_DIR, "potential_table.yaml"))
@@ -152,6 +153,42 @@ class MD(BaseFileWriter):
         super().__init__(template)
 
 
+# class CDDF(BaseFileWriter):
+#     def __init__(
+#         self, 
+#         CDDF_start=False,  # Enable or disable CDDF
+#         CDDF_fwhm=0.1,  # Full-width at half maximum (broadening) in eV
+#         CDDF_max_energy=50.0,  # Maximum energy in eV
+#         CDDF_min_energy=0.0,  # Minimum energy in eV
+#         CDDF_total_freq_points=2001,  # Number of frequency grid points
+#         CDDF_material_type=1,  # Material type (default 0)
+#         CDDF_kgrid=(20, 20, 20),  # k-grid for optical calculations
+#         **optcond_settings
+#     ):
+#         template = {
+#             "CDDF.start": "on" if CDDF_start else "off",
+#             "CDDF.FWHM": CDDF_fwhm,
+#             "CDDF.maximum_energy": CDDF_max_energy,
+#             "CDDF.minimum_energy": CDDF_min_energy,
+#             "CDDF.frequency.grid.total_number": CDDF_total_freq_points,
+#             "CDDF.material_type": CDDF_material_type,
+#             "CDDF.Kgrid": CDDF_kgrid,
+#         }
+
+#         # Allow additional settings
+#         template.update(optcond_settings)
+
+#         super().__init__(template)
+
+#     @classmethod
+#     def get_optcond_with_pmg_kgrid(cls, structure, CDDF_kgrid_density=1, **kwargs):
+#         if not isinstance(structure, Structure):
+#             structure = Structure.from_file(structure)
+#         lattice_vectors = structure.lattice.matrix
+#         kgrid = [int(np.round(np.linalg.norm(lattice_vectors[i, :]) / CDDF_kgrid_density)) for i in range(3)]
+#         kgrid = [x + 1 if x % 2 != 0 else x for x in kgrid]
+#         # kgrid = Scf.get_kgrid_from_pmg_structure(structure, kCDDF, force_gamma)
+#         return cls(CDDF_kgrid=kgrid, **kwargs)
 
 
 
@@ -172,4 +209,3 @@ if __name__ == "__main__":
 
     md = MD(md_type="nomd", md_max_iter=1, md_time_step=0.5, md_opt_criterion=1.0e-4)
     print(md.template)
-
